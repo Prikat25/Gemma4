@@ -87,7 +87,30 @@ def main() -> None:
         action="store_true",
         help="Run the full E0-E6 scientific experiment ablation matrix",
     )
+    parser.add_argument(
+        "--package-submission",
+        action="store_true",
+        help="Validate agent.yaml and build Kaggle submission.zip with agent.yaml at root",
+    )
+    parser.add_argument(
+        "--validate-submission",
+        action="store_true",
+        help="Validate agent.yaml against Google ADK & Kaggle competition specifications",
+    )
     args = parser.parse_args()
+
+    if args.validate_submission:
+        from package_submission import validate_agent_config
+        report = validate_agent_config(AGENT_ROOT)
+        print(json.dumps(report, indent=2))
+        return
+
+    if args.package_submission:
+        from package_submission import build_submission_zip
+        out_zip = AGENT_ROOT / "submission.zip"
+        res = build_submission_zip(AGENT_ROOT, out_zip)
+        print(json.dumps(res, indent=2))
+        return
 
     if args.matrix:
         out = run_ablation_matrix()

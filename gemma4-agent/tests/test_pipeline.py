@@ -105,6 +105,32 @@ class TestGemma4AgentBackend(unittest.TestCase):
             "PASSED_SINGLE_REGISTRATION",
         )
 
+    def test_kaggle_adk_agent_yaml_spec_and_packaging(self):
+        from package_submission import validate_agent_config, build_submission_zip
+        report = validate_agent_config(AGENT_ROOT)
+        self.assertTrue(report["valid"])
+        self.assertEqual(report["errors"], [])
+        self.assertEqual(report["config"]["name"], "gemma4-swe-agent")
+        self.assertEqual(report["config"]["version"], "0.1.0")
+        self.assertEqual(report["config"]["model"], "gemma-4-31b-it-qat-w4a16-ct")
+        self.assertEqual(
+            report["config"]["model_config"]["base_model"],
+            "gemma-4-31b-it-qat-w4a16-ct",
+        )
+        self.assertEqual(report["config"]["model_config"]["quantization"], "W4A16_CT")
+        self.assertEqual(report["config"]["tools_count"], 9)
+
+        # Test building submission.zip with agent.yaml at root
+        test_zip = AGENT_ROOT / "test_submission.zip"
+        if test_zip.exists():
+            test_zip.unlink()
+        zip_res = build_submission_zip(AGENT_ROOT, test_zip)
+        self.assertTrue(zip_res["success"])
+        self.assertTrue(zip_res["agent_yaml_at_root"])
+        self.assertGreater(zip_res["archive_size_bytes"], 1000)
+        self.assertTrue(test_zip.exists())
+        test_zip.unlink()
+
 
 if __name__ == "__main__":
     unittest.main()

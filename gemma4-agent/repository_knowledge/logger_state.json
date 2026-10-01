@@ -73,27 +73,27 @@
       "target": "tests/test_checkout.py::test_checkout_applies_coupon",
       "passed": false,
       "exit_code": 1,
-      "duration_seconds": 0.089,
+      "duration_seconds": 0.062,
       "expected": "100.0",
       "received": "120.0",
-      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_4crl9jw6/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)"
+      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_1zoalmes/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)"
     },
     {
       "scope": "targeted",
       "target": "tests/test_checkout.py::test_checkout_applies_coupon",
       "passed": false,
       "exit_code": 1,
-      "duration_seconds": 0.078,
+      "duration_seconds": 0.055,
       "expected": "100.0",
       "received": "120.0",
-      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_4crl9jw6/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)"
+      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_1zoalmes/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)"
     },
     {
       "scope": "targeted",
       "target": "tests/test_checkout.py::test_checkout_applies_coupon",
       "passed": true,
       "exit_code": 0,
-      "duration_seconds": 0.086,
+      "duration_seconds": 0.055,
       "expected": null,
       "received": null,
       "output": ".\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nOK"
@@ -103,7 +103,7 @@
       "target": "tests/ (full regression suite)",
       "passed": true,
       "exit_code": 0,
-      "duration_seconds": 0.082,
+      "duration_seconds": 0.058,
       "expected": null,
       "received": null,
       "output": "test_checkout_applies_coupon (test_checkout.TestCheckoutFlow) ... ok\ntest_checkout_invalid_coupon_charges_subtotal (test_checkout.TestCheckoutFlow) ... ok\ntest_checkout_without_coupon (test_checkout.TestCheckoutFlow) ... ok\n\n----------------------------------------------------------------------\nRan 3 tests in 0.000s\n\nOK"
@@ -115,20 +115,20 @@
       "target": "tests/test_checkout.py::test_checkout_applies_coupon",
       "passed": false,
       "exit_code": 1,
-      "duration_seconds": 0.089,
+      "duration_seconds": 0.062,
       "expected": "100.0",
       "received": "120.0",
-      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_4crl9jw6/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)"
+      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_1zoalmes/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)"
     },
     {
       "scope": "targeted",
       "target": "tests/test_checkout.py::test_checkout_applies_coupon",
       "passed": false,
       "exit_code": 1,
-      "duration_seconds": 0.078,
+      "duration_seconds": 0.055,
       "expected": "100.0",
       "received": "120.0",
-      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_4crl9jw6/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.001s\n\nFAILED (failures=1)"
+      "output": "F\n======================================================================\nFAIL: test_checkout_applies_coupon (tests.test_checkout.TestCheckoutFlow)\n----------------------------------------------------------------------\nTraceback (most recent call last):\n  File \"/tmp/gemma4_task_E5_1zoalmes/repo/tests/test_checkout.py\", line 25, in test_checkout_applies_coupon\n    self.assertEqual(\nAssertionError: 120.0 != 100.0 : Expected: 100.0, Received: 120.0\n\n----------------------------------------------------------------------\nRan 1 test in 0.000s\n\nFAILED (failures=1)"
     }
   ],
   "changes": [
@@ -169,7 +169,7 @@
     "task_tier": "complex",
     "allocated_task_minutes": 40.0,
     "allocated_task_seconds": 2400.0,
-    "elapsed_seconds": 0.011,
+    "elapsed_seconds": 0.007,
     "within_budget": true
   },
   "active_capabilities": {

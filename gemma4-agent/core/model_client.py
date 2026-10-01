@@ -13,11 +13,28 @@ class Gemma4ModelClient:
     """
 
     def __init__(self, config: Dict[str, Any]):
-        model_cfg = config.get("model", {})
+        model_raw = config.get("model", "gemma-4-31b-it-qat-w4a16-ct")
+        model_cfg_obj = config.get("model_config", {})
+        gen_cfg = config.get("generation_config", {})
         training_cfg = config.get("training", {})
-        self.model_name: str = model_cfg.get("name", "gemma-4-31b-it-qat-w4a16-ct")
-        self.temperature: float = float(model_cfg.get("temperature", 0.2))
-        self.max_output_tokens: int = int(model_cfg.get("max_output_tokens", 4096))
+
+        if isinstance(model_raw, dict):
+            self.model_name: str = (
+                model_raw.get("name")
+                or model_cfg_obj.get("base_model")
+                or "gemma-4-31b-it-qat-w4a16-ct"
+            )
+            self.temperature: float = float(model_raw.get("temperature", 0.2))
+            self.max_output_tokens: int = int(model_raw.get("max_output_tokens", 4096))
+        else:
+            self.model_name: str = (
+                str(model_raw)
+                or model_cfg_obj.get("base_model")
+                or "gemma-4-31b-it-qat-w4a16-ct"
+            )
+            self.temperature: float = float(gen_cfg.get("temperature", 0.2))
+            self.max_output_tokens: int = int(gen_cfg.get("max_output_tokens", 4096))
+
         self.use_lora: bool = bool(training_cfg.get("use_lora", False))
         self.lora_adapter: Optional[str] = training_cfg.get("adapter")
         self.verify_vllm_layer_registration: bool = bool(
