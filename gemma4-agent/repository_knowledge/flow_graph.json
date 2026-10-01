@@ -1,0 +1,144 @@
+{
+  "entry_points": [
+    "checkout"
+  ],
+  "direct_call_map": {
+    "validate_cart": [],
+    "process_payment": [],
+    "send_confirmation": [],
+    "checkout": [
+      "validate_cart",
+      "calculate_price",
+      "process_payment",
+      "send_confirmation"
+    ],
+    "validate_coupon": [],
+    "apply_discount": [
+      "validate_coupon"
+    ],
+    "calculate_subtotal": [],
+    "calculate_price": [
+      "calculate_subtotal",
+      "apply_discount"
+    ]
+  },
+  "execution_flows": {
+    "checkout": [
+      "checkout",
+      "validate_cart",
+      "calculate_price",
+      "calculate_subtotal",
+      "apply_discount",
+      "validate_coupon",
+      "process_payment",
+      "send_confirmation"
+    ]
+  },
+  "flow_trees": {
+    "checkout": [
+      {
+        "function": "checkout",
+        "file": "checkout.py",
+        "depth": 0,
+        "callees": [
+          "validate_cart",
+          "calculate_price",
+          "process_payment",
+          "send_confirmation"
+        ],
+        "important_logic": [
+          "executes validate_cart(items)",
+          "final_price = calculate_price(items, discount=coupon)",
+          "receipt = process_payment(final_price, customer_email)",
+          "confirmation = send_confirmation(receipt)",
+          "returns confirmation"
+        ]
+      },
+      {
+        "function": "validate_cart",
+        "file": "checkout.py",
+        "depth": 1,
+        "callees": [],
+        "important_logic": [
+          "if not items: raise ValueError('Cart cannot be empty')",
+          "returns True"
+        ]
+      },
+      {
+        "function": "calculate_price",
+        "file": "pricing.py",
+        "depth": 1,
+        "callees": [
+          "calculate_subtotal",
+          "apply_discount"
+        ],
+        "important_logic": [
+          "subtotal = calculate_subtotal(items)",
+          "if discount: calls apply_discount(subtotal, discount) as standalone statement (RETURN VALUE IGNORED)",
+          "returns round(subtotal, 2)"
+        ]
+      },
+      {
+        "function": "calculate_subtotal",
+        "file": "pricing.py",
+        "depth": 2,
+        "callees": [],
+        "important_logic": [
+          "subtotal = 0.0",
+          "returns round(subtotal, 2)"
+        ]
+      },
+      {
+        "function": "apply_discount",
+        "file": "discounts.py",
+        "depth": 2,
+        "callees": [
+          "validate_coupon"
+        ],
+        "important_logic": [
+          "if not validate_coupon(coupon): return 0.0",
+          "code = coupon.strip().upper()",
+          "discount_amount = VALID_COUPONS[code]",
+          "returns min(subtotal, discount_amount)"
+        ]
+      },
+      {
+        "function": "validate_coupon",
+        "file": "discounts.py",
+        "depth": 3,
+        "callees": [],
+        "important_logic": [
+          "if not coupon: return False",
+          "returns coupon.strip().upper() in VALID_COUPONS"
+        ]
+      },
+      {
+        "function": "process_payment",
+        "file": "checkout.py",
+        "depth": 1,
+        "callees": [],
+        "important_logic": [
+          "returns {'charged_amount': round(amount, 2), 'customer': customer_email, 'status': 'captured'}"
+        ]
+      },
+      {
+        "function": "send_confirmation",
+        "file": "checkout.py",
+        "depth": 1,
+        "callees": [],
+        "important_logic": [
+          "returns {'confirmed': payment_receipt.get('status') == 'captured', 'charged_amount': payment_receipt['charged_amount'], 'recipient': payment_receipt['customer']}"
+        ]
+      }
+    ]
+  },
+  "detected_flow_anomalies": [
+    {
+      "function": "calculate_price",
+      "file": "pricing.py",
+      "anomaly": "if discount: calls apply_discount(subtotal, discount) as standalone statement (RETURN VALUE IGNORED)",
+      "severity": "high",
+      "explanation": "In `calculate_price()`, a downstream function in the execution flow is invoked as a bare statement without capturing or returning its result."
+    }
+  ]
+}

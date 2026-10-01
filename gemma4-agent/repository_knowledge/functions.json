@@ -1,0 +1,190 @@
+[
+  {
+    "function": "validate_cart",
+    "file": "checkout.py",
+    "line_start": 7,
+    "line_end": 14,
+    "inputs": [
+      "items"
+    ],
+    "outputs": "bool",
+    "purpose": "Validates that the shopping cart is non-empty and items have positive prices.",
+    "calls": [
+      "get"
+    ],
+    "called_by": [
+      "checkout"
+    ],
+    "side_effects": [],
+    "important_logic": [
+      "if not items: raise ValueError('Cart cannot be empty')",
+      "returns True"
+    ]
+  },
+  {
+    "function": "process_payment",
+    "file": "checkout.py",
+    "line_start": 17,
+    "line_end": 23,
+    "inputs": [
+      "amount",
+      "customer_email"
+    ],
+    "outputs": "Dict[str, Any]",
+    "purpose": "Processes customer payment for the computed final amount.",
+    "calls": [],
+    "called_by": [
+      "checkout"
+    ],
+    "side_effects": [],
+    "important_logic": [
+      "returns {'charged_amount': round(amount, 2), 'customer': customer_email, 'status': 'captured'}"
+    ]
+  },
+  {
+    "function": "send_confirmation",
+    "file": "checkout.py",
+    "line_start": 26,
+    "line_end": 32,
+    "inputs": [
+      "payment_receipt"
+    ],
+    "outputs": "Dict[str, Any]",
+    "purpose": "Builds order confirmation payload after payment capture.",
+    "calls": [
+      "get"
+    ],
+    "called_by": [
+      "checkout"
+    ],
+    "side_effects": [],
+    "important_logic": [
+      "returns {'confirmed': payment_receipt.get('status') == 'captured', 'charged_amount': payment_receipt['charged_amount'], 'recipient': payment_receipt['customer']}"
+    ]
+  },
+  {
+    "function": "checkout",
+    "file": "checkout.py",
+    "line_start": 35,
+    "line_end": 45,
+    "inputs": [
+      "items",
+      "customer_email",
+      "coupon"
+    ],
+    "outputs": "Dict[str, Any]",
+    "purpose": "Primary checkout entry point orchestrating validation, pricing, payment, and confirmation.",
+    "calls": [
+      "validate_cart",
+      "calculate_price",
+      "process_payment",
+      "send_confirmation"
+    ],
+    "called_by": [],
+    "side_effects": [],
+    "important_logic": [
+      "executes validate_cart(items)",
+      "final_price = calculate_price(items, discount=coupon)",
+      "receipt = process_payment(final_price, customer_email)",
+      "confirmation = send_confirmation(receipt)",
+      "returns confirmation"
+    ]
+  },
+  {
+    "function": "validate_coupon",
+    "file": "discounts.py",
+    "line_start": 12,
+    "line_end": 16,
+    "inputs": [
+      "coupon"
+    ],
+    "outputs": "bool",
+    "purpose": "Returns True if the coupon code exists in VALID_COUPONS.",
+    "calls": [
+      "upper",
+      "strip"
+    ],
+    "called_by": [
+      "apply_discount"
+    ],
+    "side_effects": [],
+    "important_logic": [
+      "if not coupon: return False",
+      "returns coupon.strip().upper() in VALID_COUPONS"
+    ]
+  },
+  {
+    "function": "apply_discount",
+    "file": "discounts.py",
+    "line_start": 19,
+    "line_end": 25,
+    "inputs": [
+      "subtotal",
+      "coupon"
+    ],
+    "outputs": "float",
+    "purpose": "Calculates the discount amount to deduct for a given subtotal and coupon code.",
+    "calls": [
+      "upper",
+      "validate_coupon",
+      "strip"
+    ],
+    "called_by": [
+      "calculate_price"
+    ],
+    "side_effects": [],
+    "important_logic": [
+      "if not validate_coupon(coupon): return 0.0",
+      "code = coupon.strip().upper()",
+      "discount_amount = VALID_COUPONS[code]",
+      "returns min(subtotal, discount_amount)"
+    ]
+  },
+  {
+    "function": "calculate_subtotal",
+    "file": "pricing.py",
+    "line_start": 7,
+    "line_end": 14,
+    "inputs": [
+      "items"
+    ],
+    "outputs": "float",
+    "purpose": "Calculates raw order subtotal from line items.",
+    "calls": [
+      "get"
+    ],
+    "called_by": [
+      "calculate_price"
+    ],
+    "side_effects": [],
+    "important_logic": [
+      "subtotal = 0.0",
+      "returns round(subtotal, 2)"
+    ]
+  },
+  {
+    "function": "calculate_price",
+    "file": "pricing.py",
+    "line_start": 17,
+    "line_end": 23,
+    "inputs": [
+      "items",
+      "discount"
+    ],
+    "outputs": "float",
+    "purpose": "Calculates final order price after applying any valid discount coupon.",
+    "calls": [
+      "calculate_subtotal",
+      "apply_discount"
+    ],
+    "called_by": [
+      "checkout"
+    ],
+    "side_effects": [],
+    "important_logic": [
+      "subtotal = calculate_subtotal(items)",
+      "if discount: calls apply_discount(subtotal, discount) as standalone statement (RETURN VALUE IGNORED)",
+      "returns round(subtotal, 2)"
+    ]
+  }
+]

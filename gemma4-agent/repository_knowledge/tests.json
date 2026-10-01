@@ -1,0 +1,52 @@
+[
+  {
+    "test_name": "test_checkout_without_coupon",
+    "file": "tests/test_checkout.py",
+    "line_start": 9,
+    "line_end": 16,
+    "behavior_tested": "Exercises checkout and verifies 2 assertion(s)",
+    "exercised_functions": [
+      "checkout"
+    ],
+    "expected_flow": [
+      "checkout"
+    ],
+    "encoded_assumptions": [
+      "self.assertTrue(result['confirmed'])",
+      "self.assertEqual(result['charged_amount'], 120.0)"
+    ]
+  },
+  {
+    "test_name": "test_checkout_applies_coupon",
+    "file": "tests/test_checkout.py",
+    "line_start": 18,
+    "line_end": 29,
+    "behavior_tested": "Exercises checkout and verifies 2 assertion(s)",
+    "exercised_functions": [
+      "checkout"
+    ],
+    "expected_flow": [
+      "checkout"
+    ],
+    "encoded_assumptions": [
+      "self.assertTrue(result['confirmed'])",
+      "self.assertEqual(result['charged_amount'], 100.0, f\"Expected: 100.0, Received: {result['charged_amount']}\")"
+    ]
+  },
+  {
+    "test_name": "test_checkout_invalid_coupon_charges_subtotal",
+    "file": "tests/test_checkout.py",
+    "line_start": 31,
+    "line_end": 34,
+    "behavior_tested": "Exercises calculate_price and verifies 1 assertion(s)",
+    "exercised_functions": [
+      "calculate_price"
+    ],
+    "expected_flow": [
+      "calculate_price"
+    ],
+    "encoded_assumptions": [
+      "self.assertEqual(price, 120.0)"
+    ]
+  }
+]

@@ -1,0 +1,73 @@
+experiment_id: "E0"
+description: "E0 Baseline: Base model + tools only (No summaries, no flow graph, no bug DB, no planner, no failure loop, no LoRA)"
+
+model:
+  name: "gemma-4-31b-it-qat-w4a16-ct"
+  temperature: 0.2
+  max_output_tokens: 4096
+
+architecture:
+  use_logger: true
+  use_function_summarizer: false
+  use_bug_lookup: false
+  use_flow_graph: false
+  use_planner: false
+  use_researcher: false
+  use_validator: true
+  use_failure_analyzer: false
+
+retrieval:
+  use_local_bug_db: false
+  use_external_knowledge: false
+  max_results: 0
+
+repository:
+  summarize_functions: false
+  summarize_classes: false
+  build_call_graph: false
+  build_flow_graph: false
+  summarize_tests: false
+  persistent_cache: false
+
+planning:
+  require_explicit_plan: false
+  require_evidence: false
+  max_plan_iterations: 1
+  forbid_code_edits: true
+
+coding:
+  max_files_changed: 5
+  require_diff_review: false
+
+validation:
+  run_targeted_tests_first: true
+  run_broader_tests_after_targeted: true
+  max_repair_iterations: 1
+
+context:
+  max_function_summaries: 0
+  max_tests: 5
+  max_flow_nodes: 0
+  max_bug_matches: 0
+  max_research_results: 0
+
+time:
+  total_budget_hours: 12
+  total_budget_minutes: 720
+  reserve_percentage: 10
+  reserve_minutes: 60
+  task_allocation:
+    simple: 10
+    medium: 20
+    complex: 40
+  complexity_weights:
+    relevant_file_count: 0.30
+    flow_depth: 0.25
+    test_count: 0.20
+    dependency_count: 0.15
+    issue_length: 0.10
+
+training:
+  use_lora: false
+  adapter: null
+  verify_vllm_layer_registration: true

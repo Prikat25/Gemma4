@@ -1,0 +1,68 @@
+{
+  "checkout.py": {
+    "file": "checkout.py",
+    "imports": [
+      "typing.List",
+      "typing.Dict",
+      "typing.Any",
+      "typing.Optional",
+      "pricing.calculate_price"
+    ],
+    "functions": [
+      "validate_cart",
+      "process_payment",
+      "send_confirmation",
+      "checkout"
+    ],
+    "classes": [],
+    "line_count": 45
+  },
+  "discounts.py": {
+    "file": "discounts.py",
+    "imports": [
+      "typing.Dict"
+    ],
+    "functions": [
+      "validate_coupon",
+      "apply_discount"
+    ],
+    "classes": [],
+    "line_count": 25
+  },
+  "pricing.py": {
+    "file": "pricing.py",
+    "imports": [
+      "typing.List",
+      "typing.Dict",
+      "typing.Any",
+      "typing.Optional",
+      "discounts.apply_discount"
+    ],
+    "functions": [
+      "calculate_subtotal",
+      "calculate_price"
+    ],
+    "classes": [],
+    "line_count": 23
+  },
+  "tests/__init__.py": {
+    "file": "tests/__init__.py",
+    "imports": [],
+    "functions": [],
+    "classes": [],
+    "line_count": 1
+  },
+  "tests/test_checkout.py": {
+    "file": "tests/test_checkout.py",
+    "imports": [
+      "unittest",
+      "checkout.checkout",
+      "pricing.calculate_price"
+    ],
+    "functions": [],
+    "classes": [
+      "TestCheckoutFlow"
+    ],
+    "line_count": 38
+  }
+}

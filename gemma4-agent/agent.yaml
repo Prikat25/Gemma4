@@ -1,0 +1,73 @@
+name: gemma4-swe-agent
+version: 0.1.0
+description: "Autonomous SWE Agent around Gemma 4 31B IT QAT W4A16 CT following UNDERSTAND -> LOCALIZE -> PLAN -> PATCH -> VALIDATE -> LEARN"
+
+model:
+  base_model: "gemma-4-31b-it-qat-w4a16-ct"
+  quantization: "W4A16_CT"
+  config_ref: "config/experiment.yaml"
+
+entry_point: "cli.py"
+pipeline_order:
+  - understand
+  - localize
+  - plan
+  - patch
+  - validate
+  - learn
+
+subagents:
+  supervisor:
+    role: "Orchestrates workflow, enforces time/iteration budgets, prevents phase violations"
+    prompt: "prompts/system.md"
+    skills:
+      - time_management
+      - logging
+  logger:
+    role: "Maintains deterministic structured LoggerState JSON without prose invention"
+    skills:
+      - logging
+  function_summarizer:
+    role: "Extracts AST functions/classes/tests and generates persistent repository_knowledge cache"
+    prompt: "prompts/function_summarizer.md"
+    skills:
+      - repository_analysis
+      - function_summary
+      - flow_analysis
+      - testing
+  bug_lookup:
+    role: "Queries local bug_db for historical issue/symptom/flow patterns (evidence, not truth)"
+    skills:
+      - bug_lookup
+  researcher:
+    role: "Local-first 5-level hierarchy evidence gatherer"
+    prompt: "prompts/researcher.md"
+    skills:
+      - repository_analysis
+      - flow_analysis
+      - testing
+  planner:
+    role: "Produces structured PlanArtifact from flow divergence & evidence. Strictly forbidden from editing files."
+    prompt: "prompts/planner.md"
+    can_write_files: false
+    skills:
+      - function_summary
+      - flow_analysis
+      - bug_lookup
+      - testing
+  coder:
+    role: "Generates minimal unified diff patch from PlanArtifact and localized files"
+    prompt: "prompts/coder.md"
+    can_write_files: true
+    skills:
+      - coding
+  validator:
+    role: "Executes targeted tests first, then broader regression suite on pass"
+    skills:
+      - testing
+  failure_analyzer:
+    role: "Translates test failures into structured FailureAnalysisArtifact for iterative repair"
+    prompt: "prompts/failure_analyzer.md"
+    skills:
+      - testing
+      - flow_analysis

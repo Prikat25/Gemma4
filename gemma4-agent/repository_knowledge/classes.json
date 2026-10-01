@@ -1,0 +1,17 @@
+[
+  {
+    "class_name": "TestCheckoutFlow",
+    "file": "tests/test_checkout.py",
+    "line_start": 8,
+    "line_end": 34,
+    "bases": [
+      "unittest.TestCase"
+    ],
+    "methods": [
+      "test_checkout_without_coupon",
+      "test_checkout_applies_coupon",
+      "test_checkout_invalid_coupon_charges_subtotal"
+    ],
+    "purpose": "Class TestCheckoutFlow in tests/test_checkout.py"
+  }
+]
