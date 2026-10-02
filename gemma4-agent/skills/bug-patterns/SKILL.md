@@ -1,5 +1,5 @@
 ---
-name: bug_patterns
+name: bug-patterns
 description: Offline catalog of common bug archetypes (coupons/pricing, boundary conditions, mutable defaults, ignored returns).
 ---
 

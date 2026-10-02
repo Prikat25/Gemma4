@@ -1,5 +1,5 @@
 ---
-name: swe_reasoning
+name: swe-reasoning
 description: Structured engineering reasoning doctrine enforcing UNDERSTAND -> LOCALIZE -> PLAN -> PATCH -> VALIDATE -> REPAIR.
 ---
 

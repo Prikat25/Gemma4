@@ -1,5 +1,5 @@
 ---
-name: repository_navigation
+name: repository-navigation
 description: Guidance on using competition harness graph, embedding, and file reading tools to localize code quickly.
 ---
 

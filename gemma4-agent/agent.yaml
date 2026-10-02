@@ -23,10 +23,10 @@ tools:
       skip_summarization: True
 
 skills:
-  - skills/swe-reasoning
-  - skills/repository-navigation
-  - skills/testing
-  - skills/bug-patterns  
+  - swe-reasoning
+  - repository-navigation
+  - testing
+  - bug-patterns  
 
 include_contents: "default"
 
