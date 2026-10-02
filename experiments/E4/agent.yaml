@@ -1,0 +1,38 @@
+name: gemma4-swe-agent-e4
+version: 0.1.0
+model: "gemma-4-31b-it-qat-w4a16-ct"
+
+model_config:
+  base_model: "gemma-4-31b-it-qat-w4a16-ct"
+  quantization: "W4A16_CT"
+  experiment_id: "E4"
+
+description: "Experiment E4: E3 + mandatory explicit PLAN phase before modifying any files."
+
+instruction: "prompts/system.md"
+
+tools:
+  - run_command
+  - read_file
+  - edit_file
+  - write_file
+  - get_status
+  - submit_patch
+  - search_similar_code
+  - get_code_neighbors
+  - get_code_subgraph
+
+skills:
+  - swe_reasoning
+  - repository_navigation
+  - bug_patterns
+  - testing
+
+generation_config:
+  temperature: 0.2
+  max_output_tokens: 4096
+
+execution_policy:
+  require_plan_before_edit: true
+
+adapter: null

@@ -1,0 +1,33 @@
+name: gemma4-swe-agent-e2
+version: 0.1.0
+model: "gemma-4-31b-it-qat-w4a16-ct"
+
+model_config:
+  base_model: "gemma-4-31b-it-qat-w4a16-ct"
+  quantization: "W4A16_CT"
+  experiment_id: "E2"
+
+description: "Experiment E2: E1 + structured UNDERSTAND & LOCALIZE reasoning progression."
+
+instruction: "prompts/system.md"
+
+tools:
+  - run_command
+  - read_file
+  - edit_file
+  - write_file
+  - get_status
+  - submit_patch
+  - search_similar_code
+  - get_code_neighbors
+  - get_code_subgraph
+
+skills:
+  - swe_reasoning
+  - repository_navigation
+
+generation_config:
+  temperature: 0.2
+  max_output_tokens: 4096
+
+adapter: null

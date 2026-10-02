@@ -1,0 +1,23 @@
+[
+  {
+    "pattern_id": "PATTERN-001",
+    "name": "ignored_return_value",
+    "description": "Helper function return value is dropped by caller rather than incorporated into result.",
+    "diagnostic_clue": "Function call on a line by itself inside an if-block or calculation sequence without variable assignment.",
+    "remedy": "Assign helper return value to variable and subtract/apply to final returned total."
+  },
+  {
+    "pattern_id": "PATTERN-002",
+    "name": "off_by_one_boundary",
+    "description": "Upper or lower bound in range or slice is shifted by 1.",
+    "diagnostic_clue": "Items array missing final element or throwing IndexError on exact page sizes.",
+    "remedy": "Adjust slice upper bound from len-1 to len or start+size."
+  },
+  {
+    "pattern_id": "PATTERN-003",
+    "name": "mutable_default_argument",
+    "description": "Default list/dict parameter persists mutations across invocations.",
+    "diagnostic_clue": "Second call retains items added in first call when default argument is used.",
+    "remedy": "Use None as default and instantiate fresh container inside function body."
+  }
+]

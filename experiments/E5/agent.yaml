@@ -1,17 +1,16 @@
-name: gemma4-swe-agent
+name: gemma4-swe-agent-e5
 version: 0.1.0
 model: "gemma-4-31b-it-qat-w4a16-ct"
 
 model_config:
   base_model: "gemma-4-31b-it-qat-w4a16-ct"
   quantization: "W4A16_CT"
-  config_ref: "configs/experiment.yaml"
+  experiment_id: "E5"
 
-description: "Autonomous SWE Agent for Google Gemma 4 Developer Agent competition built on Gemma 4 31B IT QAT W4A16 CT with ADK-compliant tools, read-only researcher AgentTool, and iterative test-repair loop."
+description: "Experiment E5: E4 + iterative validation repair loop + read-only repository_researcher agent_tool."
 
 instruction: "prompts/system.md"
 
-# Official sandbox harness tools provided by Kaggle swegemma
 tools:
   - run_command
   - read_file
@@ -19,11 +18,10 @@ tools:
   - write_file
   - get_status
   - submit_patch
-  - get_code_neighbors
   - search_similar_code
+  - get_code_neighbors
   - get_code_subgraph
 
-# Optional read-only researcher sub-agent tool
 agent_tools:
   - name: repository_researcher
     config: "sub_agents/repository_researcher.yaml"
@@ -31,8 +29,8 @@ agent_tools:
 skills:
   - swe_reasoning
   - repository_navigation
-  - testing
   - bug_patterns
+  - testing
 
 generation_config:
   temperature: 0.2
@@ -40,9 +38,9 @@ generation_config:
 
 execution_policy:
   max_repair_iterations: 3
+  require_plan_before_edit: true
   run_targeted_tests_first: true
   run_regression_tests: true
   submit_only_after_validation: true
-  forbid_test_edits: true
 
 adapter: null
