@@ -10,4 +10,4 @@ tools:
   - get_code_subgraph
   - get_status
 
-generate_content_config: !include configs/experiment.yaml
+generate_content_config: !include ../configs/experiment.yaml
