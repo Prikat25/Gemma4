@@ -1,7 +1,7 @@
 name: gemma4-swe-agent
 model: "gemma-4-31b-it-qat-w4a16-ct"
 
-generate_content_config: "configs/experiment.yaml"
+generate_content_config: !include configs/experiment.yaml
 
 description: "Autonomous SWE Agent for Google Gemma 4 Developer Agent competition built on Gemma 4 31B IT QAT W4A16 CT with ADK-compliant tools, read-only researcher AgentTool, and iterative test-repair loop."
 
