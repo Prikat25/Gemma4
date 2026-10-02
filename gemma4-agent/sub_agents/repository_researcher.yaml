@@ -1,17 +1,13 @@
 name: repository_researcher
 description: "Read-only sub-agent specializing in repository graph exploration, semantic code search, and symbol discovery."
 model: "gemma-4-31b-it-qat-w4a16-ct"
-instruction: "prompts/researcher.md"
-can_write_files: false
-skip_summarization: true
+instruction: ! include prompts/researcher.md
 
 tools:
   - read_file
   - search_similar_code
-  - get_code_neighbors
+  - get_code_neighbors  
   - get_code_subgraph
   - get_status
 
-generation_config:
-  temperature: 0.1
-  max_output_tokens: 2048
+generate_content_config: "configs/experiment.yaml"

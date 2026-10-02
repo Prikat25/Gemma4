@@ -19,22 +19,15 @@ tools:
   - search_similar_code
   - get_code_subgraph
   - agent_tool:
-    config_path: sub_agents/repository_researcher.yaml
-    skip_summarization: True
+      config_path: sub_agents/repository_researcher.yaml
+      skip_summarization: True
 
 skills:
-  - swe_reasoning
-  - repository_navigation
-  - testing
-  - bug_patterns  
+  - skills/swe_reasoning
+  - skills/repository_navigation
+  - skills/testing
+  - skills/bug_patterns  
 
 include_contents: "default"
-
-execution_policy:
-  max_repair_iterations: 3
-  run_targeted_tests_first: true
-  run_regression_tests: true
-  submit_only_after_validation: true
-  forbid_test_edits: true
 
 adapter: null
