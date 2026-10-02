@@ -5,92 +5,44 @@ model: "gemma-4-31b-it-qat-w4a16-ct"
 model_config:
   base_model: "gemma-4-31b-it-qat-w4a16-ct"
   quantization: "W4A16_CT"
-  config_ref: "config/experiment.yaml"
+  config_ref: "configs/experiment.yaml"
 
-description: "Autonomous SWE Agent around Gemma 4 31B IT QAT W4A16 CT following UNDERSTAND -> LOCALIZE -> PLAN -> PATCH -> VALIDATE -> LEARN for Google Gemma 4 Developer Agent competition."
+description: "Autonomous SWE Agent for Google Gemma 4 Developer Agent competition built on Gemma 4 31B IT QAT W4A16 CT with ADK-compliant tools, read-only researcher AgentTool, and iterative test-repair loop."
 
-entry_point: "cli.py"
 instruction: "prompts/system.md"
 
-# Competition harness tools supported in the sandbox environment
+# Official competition sandbox tools provided by Kaggle swegemma
 tools:
   - run_command
   - read_file
   - edit_file
   - write_file
-  - submit_patch
   - get_status
-  - search_similar_code
+  - submit_patch
   - get_code_neighbors
+  - search_similar_code
   - get_code_subgraph
+
+# Optional read-only researcher sub-agent tool
+agent_tools:
+  - name: repository_researcher
+    config: "sub_agents/repository_researcher.yaml"
+
+skills:
+  - swe_reasoning
+  - repository_navigation
+  - testing
+  - bug_patterns
 
 generation_config:
   temperature: 0.2
   max_output_tokens: 4096
 
-adapters_dir: "adapters/"
+execution_policy:
+  max_repair_iterations: 3
+  run_targeted_tests_first: true
+  run_regression_tests: true
+  submit_only_after_validation: true
+  forbid_test_edits: true
+
 adapter: null
-
-pipeline_order:
-  - understand
-  - localize
-  - plan
-  - patch
-  - validate
-  - learn
-
-subagents:
-  supervisor:
-    role: "Orchestrates workflow, enforces time/iteration budgets, prevents phase violations"
-    prompt: "prompts/system.md"
-    skills:
-      - time_management
-      - logging
-  logger:
-    role: "Maintains deterministic structured LoggerState JSON without prose invention"
-    skills:
-      - logging
-  function_summarizer:
-    role: "Extracts AST functions/classes/tests and generates persistent repository_knowledge cache"
-    prompt: "prompts/function_summarizer.md"
-    skills:
-      - repository_analysis
-      - function_summary
-      - flow_analysis
-      - testing
-  bug_lookup:
-    role: "Queries local bug_db for historical issue/symptom/flow patterns (evidence, not truth)"
-    skills:
-      - bug_lookup
-  researcher:
-    role: "Local-first 5-level hierarchy evidence gatherer"
-    prompt: "prompts/researcher.md"
-    skills:
-      - repository_analysis
-      - flow_analysis
-      - testing
-  planner:
-    role: "Produces structured PlanArtifact from flow divergence & evidence. Strictly forbidden from editing files."
-    prompt: "prompts/planner.md"
-    can_write_files: false
-    skills:
-      - function_summary
-      - flow_analysis
-      - bug_lookup
-      - testing
-  coder:
-    role: "Generates minimal unified diff patch from PlanArtifact and localized files"
-    prompt: "prompts/coder.md"
-    can_write_files: true
-    skills:
-      - coding
-  validator:
-    role: "Executes targeted tests first, then broader regression suite on pass"
-    skills:
-      - testing
-  failure_analyzer:
-    role: "Translates test failures into structured FailureAnalysisArtifact for iterative repair"
-    prompt: "prompts/failure_analyzer.md"
-    skills:
-      - testing
-      - flow_analysis

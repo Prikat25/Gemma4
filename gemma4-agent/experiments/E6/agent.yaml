@@ -1,0 +1,41 @@
+name: gemma4-swe-agent-e6
+version: 0.1.0
+model: "gemma-4-31b-it-qat-w4a16-ct"
+
+model_config:
+  base_model: "gemma-4-31b-it-qat-w4a16-ct"
+  quantization: "W4A16_CT"
+  experiment_id: "E6"
+
+description: "Experiment E6: E5 + real trained PEFT LoRA adapter (currently DISABLED until real adapter weights are provided)."
+
+instruction: "prompts/system.md"
+
+tools:
+  - run_command
+  - read_file
+  - edit_file
+  - write_file
+  - get_status
+  - submit_patch
+  - search_similar_code
+  - get_code_neighbors
+  - get_code_subgraph
+
+agent_tools:
+  - name: repository_researcher
+    config: "sub_agents/repository_researcher.yaml"
+
+skills:
+  - swe_reasoning
+  - repository_navigation
+  - bug_patterns
+  - testing
+
+generation_config:
+  temperature: 0.2
+  max_output_tokens: 4096
+
+# E6 LoRA adapter declaration. Set to null until real PEFT weights exist.
+# Real adapters must reside in adapters/<name>/ containing adapter_config.json and adapter_model.safetensors.
+adapter: null

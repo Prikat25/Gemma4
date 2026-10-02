@@ -1,0 +1,23 @@
+experiment_id: "E5"
+description: "Master ADK configuration: Gemma 4 + full toolset + skills + researcher agent_tool + failure repair loop"
+
+model:
+  name: "gemma-4-31b-it-qat-w4a16-ct"
+  temperature: 0.2
+  max_output_tokens: 4096
+
+features:
+  use_file_tools: true
+  use_graph_tools: true
+  use_skills: true
+  use_researcher_subagent: true
+  use_bug_patterns: true
+  require_plan: true
+  require_validation_before_submit: true
+  max_repair_iterations: 3
+  use_lora: false
+  adapter: null
+
+budget:
+  total_hours: 12
+  per_task_timeout_minutes: 30

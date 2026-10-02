@@ -1,185 +1,254 @@
 #!/usr/bin/env python3
 """
-Kaggle Gemma 4 Developer Agent Submission Packager & Validator.
+Kaggle Gemma 4 Developer Agent Submission Packager & ADK Validator.
 
-Builds a valid `submission.zip` according to Google ADK & Kaggle competition specs:
-- `agent.yaml` placed at the root of `submission.zip`
-- Model alias declared as `gemma-4-31b-it-qat-w4a16-ct`
-- Includes prompts/, skills/, tools/, core/, config/, knowledge/
-- Validates prompt references and tool declarations
+Converts declarative ADK configurations into the exact `submission.zip` archive
+expected by the competition harness:
+  - `agent.yaml` at the root of `submission.zip`
+  - Top-level `model: gemma-4-31b-it-qat-w4a16-ct`
+  - Harness tools only (run_command, read_file, edit_file, write_file, get_status, submit_patch,
+    get_code_neighbors, search_similar_code, get_code_subgraph)
+  - Referenced prompts, sub-agents, and skills included
+  - No `../` path traversal
+  - Real LoRA verification (requires adapter_config.json and adapter_model.safetensors if adapter is set)
 """
 
+import os
 import sys
 import zipfile
 from pathlib import Path
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Optional
 
 AGENT_ROOT = Path(__file__).resolve().parent
-if str(AGENT_ROOT) not in sys.path:
-    sys.path.insert(0, str(AGENT_ROOT))
 
-from core.config_loader import load_yaml_file  # noqa: E402
-
-KAGGLE_REQUIRED_MODEL = "gemma-4-31b-it-qat-w4a16-ct"
-KAGGLE_HARNESS_TOOLS = {
+OFFICIAL_HARNESS_TOOLS = {
     "run_command",
     "read_file",
     "edit_file",
     "write_file",
-    "submit_patch",
     "get_status",
-    "search_similar_code",
+    "submit_patch",
     "get_code_neighbors",
+    "search_similar_code",
     "get_code_subgraph",
 }
 
+REQUIRED_MODEL = "gemma-4-31b-it-qat-w4a16-ct"
 
-def validate_agent_config(agent_root: Path) -> Dict[str, Any]:
-    yaml_path = agent_root / "agent.yaml"
-    if not yaml_path.exists():
-        raise FileNotFoundError(f"agent.yaml not found at: {yaml_path}")
 
-    cfg = load_yaml_file(yaml_path)
+def parse_simple_yaml(text: str) -> Dict[str, Any]:
+    """Zero-dependency YAML parser for ADK configuration validation."""
+    data: Dict[str, Any] = {}
+    current_key = None
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+
+        if line.startswith("  - ") and current_key:
+            val = stripped[2:].strip().strip('"').strip("'")
+            if not isinstance(data.get(current_key), list):
+                data[current_key] = []
+            data[current_key].append(val)
+            continue
+
+        if ":" in stripped:
+            parts = stripped.split(":", 1)
+            key = parts[0].strip()
+            val = parts[1].strip()
+
+            if val == "" or val.startswith("#"):
+                current_key = key
+                data[key] = [] if line.startswith(" ") else {}
+            else:
+                val = val.split(" #")[0].strip().strip('"').strip("'")
+                if val.lower() == "null" or val == "~":
+                    val = None
+                elif val.lower() == "true":
+                    val = True
+                elif val.lower() == "false":
+                    val = False
+                elif val.isdigit():
+                    val = int(val)
+                data[key] = val
+                current_key = key
+
+    return data
+
+
+def validate_adk_bundle(bundle_dir: Path) -> Dict[str, Any]:
+    yaml_file = bundle_dir / "agent.yaml"
+    if not yaml_file.exists():
+        return {
+            "valid": False,
+            "errors": [f"Missing required agent.yaml in {bundle_dir}"],
+            "warnings": [],
+        }
+
+    raw_yaml = yaml_file.read_text(encoding="utf-8")
+    cfg = parse_simple_yaml(raw_yaml)
     errors: List[str] = []
     warnings: List[str] = []
 
-    # 1. Check top-level name and version
-    name = cfg.get("name")
-    if not name:
-        errors.append("Missing required 'name' field in agent.yaml")
+    # 1. Top-level name & model
+    if not cfg.get("name"):
+        errors.append("agent.yaml missing 'name'")
 
-    # 2. Check top-level model declaration
     model = cfg.get("model")
-    if not model:
-        errors.append(f"Missing required top-level 'model' field in agent.yaml (must be '{KAGGLE_REQUIRED_MODEL}')")
-    elif model != KAGGLE_REQUIRED_MODEL:
-        errors.append(f"Invalid model '{model}': Kaggle competition strictly requires '{KAGGLE_REQUIRED_MODEL}'")
+    if model != REQUIRED_MODEL:
+        errors.append(f"Top-level 'model' must be '{REQUIRED_MODEL}', found '{model}'")
 
-    # 3. Check model_config declaration
-    model_cfg = cfg.get("model_config", {})
-    if not isinstance(model_cfg, dict):
-        errors.append("'model_config' must be a dictionary")
-    else:
-        base_model = model_cfg.get("base_model")
-        if base_model != KAGGLE_REQUIRED_MODEL:
-            errors.append(f"model_config.base_model must be '{KAGGLE_REQUIRED_MODEL}'")
+    # 2. Check for unsafe path traversal
+    for match_line in raw_yaml.splitlines():
+        if ".." in match_line:
+            errors.append(f"Forbidden path traversal '..' detected: {match_line.strip()}")
 
-    # 4. Check prompt file existence
-    instruction_path = cfg.get("instruction") or cfg.get("prompt")
-    if instruction_path and not (agent_root / instruction_path).exists():
-        errors.append(f"Referenced instruction file does not exist: {instruction_path}")
+    # 3. Instruction file existence
+    instruction = cfg.get("instruction")
+    if instruction:
+        inst_path = bundle_dir / instruction
+        if not inst_path.exists() and not (AGENT_ROOT / instruction).exists():
+            errors.append(f"Instruction file '{instruction}' not found")
 
-    subagents = cfg.get("subagents", {})
-    for sa_name, sa_info in subagents.items():
-        if isinstance(sa_info, dict):
-            sa_prompt = sa_info.get("prompt")
-            if sa_prompt and not (agent_root / sa_prompt).exists():
-                warnings.append(f"Subagent '{sa_name}' prompt file not found: {sa_prompt}")
-
-    # 5. Check declared tools against Kaggle harness tools
+    # 4. Official tools validation
     tools = cfg.get("tools", [])
-    for t in tools:
-        if t not in KAGGLE_HARNESS_TOOLS:
-            warnings.append(f"Tool '{t}' is a custom tool; ensure custom agent_tool runner is provided if not in standard sandbox.")
+    if isinstance(tools, list):
+        for t in tools:
+            if t not in OFFICIAL_HARNESS_TOOLS:
+                errors.append(f"Tool '{t}' is not an official Kaggle competition harness tool")
+
+    # 5. Skills verification
+    skills = cfg.get("skills", [])
+    if isinstance(skills, list):
+        for sk in skills:
+            sk_dir = bundle_dir / "skills" / sk
+            if not sk_dir.exists():
+                sk_dir = AGENT_ROOT / "skills" / sk
+            if not sk_dir.exists():
+                errors.append(f"Skill directory not found for declared skill '{sk}'")
+            else:
+                skill_md = sk_dir / "SKILL.md"
+                if not skill_md.exists():
+                    errors.append(f"Missing SKILL.md in skill '{sk}'")
+                elif "name:" not in skill_md.read_text(encoding="utf-8"):
+                    warnings.append(f"SKILL.md in '{sk}' missing YAML frontmatter 'name:'")
+
+    # 6. Subagent (agent_tools) verification
+    agent_tools = cfg.get("agent_tools", [])
+    if isinstance(agent_tools, list):
+        for at in agent_tools:
+            sa_dir = bundle_dir / "sub_agents"
+            if not sa_dir.exists():
+                sa_dir = AGENT_ROOT / "sub_agents"
+            if not sa_dir.exists():
+                warnings.append("Declared agent_tools but sub_agents directory not found")
+
+    # 7. LoRA adapter verification
+    adapter = cfg.get("adapter")
+    if adapter:
+        adapter_path = bundle_dir / adapter
+        if not adapter_path.exists():
+            adapter_path = AGENT_ROOT / adapter
+        if not adapter_path.exists():
+            errors.append(f"LoRA adapter '{adapter}' declared but directory not found. Fake verification prohibited.")
+        else:
+            cfg_json = adapter_path / "adapter_config.json"
+            weights = adapter_path / "adapter_model.safetensors"
+            if not cfg_json.exists() or not weights.exists():
+                errors.append(f"LoRA directory '{adapter}' missing adapter_config.json or adapter_model.safetensors")
 
     return {
         "valid": len(errors) == 0,
         "errors": errors,
         "warnings": warnings,
-        "config": {
-            "name": name,
-            "version": cfg.get("version"),
-            "model": model,
-            "model_config": model_cfg,
-            "tools_count": len(tools),
-            "subagents_count": len(subagents),
-        },
+        "config": cfg,
     }
 
 
-def build_submission_zip(agent_root: Path, output_zip_path: Path) -> Dict[str, Any]:
-    validation = validate_agent_config(agent_root)
+def package_submission(bundle_dir: Path, output_zip: Path) -> Dict[str, Any]:
+    validation = validate_adk_bundle(bundle_dir)
     if not validation["valid"]:
-        raise ValueError(f"Cannot build submission: validation failed with errors: {validation['errors']}")
+        raise ValueError(f"ADK validation failed: {validation['errors']}")
 
-    output_zip_path = Path(output_zip_path).resolve()
-    output_zip_path.parent.mkdir(parents=True, exist_ok=True)
-
-    included_directories = [
-        "config",
-        "experiments",
-        "prompts",
-        "skills",
-        "tools",
-        "core",
-        "knowledge",
-        "adapters",
-    ]
-    included_root_files = [
-        "agent.yaml",
-        "cli.py",
-        "GEMMA4_AGENT_MANIFEST.md",
-    ]
+    output_zip = Path(output_zip).resolve()
+    output_zip.parent.mkdir(parents=True, exist_ok=True)
 
     files_added: List[str] = []
 
-    with zipfile.ZipFile(output_zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        # 1. Add agent.yaml and key root files directly at root of ZIP
-        for rf in included_root_files:
-            file_path = agent_root / rf
-            if file_path.exists():
-                zf.write(file_path, arcname=rf)
-                files_added.append(rf)
+    with zipfile.ZipFile(output_zip, "w", zipfile.ZIP_DEFLATED) as zf:
+        # 1. agent.yaml MUST BE AT ARCHIVE ROOT
+        root_agent_yaml = bundle_dir / "agent.yaml"
+        zf.write(root_agent_yaml, arcname="agent.yaml")
+        files_added.append("agent.yaml")
 
-        # 2. Add directories recursively
-        for d in included_directories:
-            dir_path = agent_root / d
-            if dir_path.exists() and dir_path.is_dir():
-                for p in sorted(dir_path.rglob("*")):
+        # 2. Add local directories in bundle_dir if present
+        for sub in ["prompts", "skills", "sub_agents", "configs", "adapters"]:
+            local_sub = bundle_dir / sub
+            shared_sub = AGENT_ROOT / sub
+            source_dir = local_sub if local_sub.exists() else (shared_sub if shared_sub.exists() else None)
+
+            if source_dir and source_dir.is_dir():
+                for p in sorted(source_dir.rglob("*")):
                     if p.is_file() and "__pycache__" not in p.parts and not p.name.startswith("."):
-                        arc_name = str(p.relative_to(agent_root))
-                        zf.write(p, arcname=arc_name)
-                        files_added.append(arc_name)
-
-    zip_size_bytes = output_zip_path.stat().st_size
+                        arc_name = str(p.relative_to(source_dir.parent))
+                        if arc_name not in files_added:
+                            zf.write(p, arcname=arc_name)
+                            files_added.append(arc_name)
 
     return {
         "success": True,
-        "archive_path": str(output_zip_path),
-        "archive_size_bytes": zip_size_bytes,
+        "output_path": str(output_zip),
+        "archive_size_bytes": output_zip.stat().st_size,
         "files_count": len(files_added),
-        "files_added": files_added,
         "agent_yaml_at_root": "agent.yaml" in files_added,
-        "model_validated": KAGGLE_REQUIRED_MODEL,
-        "validation_report": validation,
+        "model": REQUIRED_MODEL,
+        "validation": validation,
     }
 
 
 def main():
     import argparse
 
-    parser = argparse.ArgumentParser(description="Package submission.zip for Kaggle Gemma 4 Developer Agent competition")
-    parser.add_argument("--output", type=str, default="submission.zip", help="Path to output submission.zip")
-    parser.add_argument("--validate-only", action="store_true", help="Only validate agent.yaml without creating zip")
+    parser = argparse.ArgumentParser(description="Package ADK submission for Kaggle Gemma 4 Developer Agent competition")
+    parser.add_argument("--experiment", type=str, default=None, help="Experiment folder (e.g. E0, E1, E2, E3, E4, E5, E6). Defaults to root agent.yaml.")
+    parser.add_argument("--output", type=str, default="submission.zip", help="Output path for submission.zip")
+    parser.add_argument("--validate-only", action="store_true", help="Run ADK validation only without building zip")
     args = parser.parse_args()
 
+    if args.experiment:
+        target_dir = AGENT_ROOT / "experiments" / args.experiment.upper()
+        if not target_dir.exists():
+            target_dir = AGENT_ROOT / "experiments" / args.experiment
+    else:
+        target_dir = AGENT_ROOT
+
     if args.validate_only:
-        report = validate_agent_config(AGENT_ROOT)
-        print(f"Validation: {'PASSED' if report['valid'] else 'FAILED'}")
+        report = validate_adk_bundle(target_dir)
+        print("ADK Validation:", "PASSED" if report["valid"] else "FAILED")
         if report["errors"]:
-            print("Errors:", report["errors"])
+            print("Errors:")
+            for err in report["errors"]:
+                print(f"  - {err}")
         if report["warnings"]:
-            print("Warnings:", report["warnings"])
+            print("Warnings:")
+            for w in report["warnings"]:
+                print(f"  - {w}")
         sys.exit(0 if report["valid"] else 1)
 
     out_zip = Path(args.output)
     if not out_zip.is_absolute():
-        out_zip = AGENT_ROOT / out_zip
+        if str(out_zip).startswith("gemma4-agent"):
+            out_zip = (AGENT_ROOT.parent / out_zip).resolve()
+        else:
+            out_zip = (AGENT_ROOT / out_zip).resolve()
 
-    res = build_submission_zip(AGENT_ROOT, out_zip)
-    print(f"Successfully packaged {res['files_count']} files into {res['archive_path']} ({res['archive_size_bytes']} bytes)")
-    print(f"agent.yaml at root: {res['agent_yaml_at_root']}")
-    print(f"Target Model: {res['model_validated']}")
+    res = package_submission(target_dir, out_zip)
+    print(f"Packaging SUCCESS:")
+    print(f"  Target: {res['output_path']} ({res['archive_size_bytes']} bytes)")
+    print(f"  Files: {res['files_count']} files packaged")
+    print(f"  agent.yaml at root: {res['agent_yaml_at_root']}")
+    print(f"  Model: {res['model']}")
 
 
 if __name__ == "__main__":
