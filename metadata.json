@@ -1,6 +1,0 @@
-{
-  "name": "Gemma 4 SWE Agent Backend & Experiment Harness",
-  "description": "Autonomous software-engineering agent backend, experiment harness, and knowledge engine for the Google Gemma 4 Developer Agent competition.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}
