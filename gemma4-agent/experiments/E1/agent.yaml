@@ -1,4 +1,4 @@
-name: gemma4-swe-agent-e1
+name: gemma4_swe_agent-e1
 version: 0.1.0
 model: "gemma-4-31b-it-qat-w4a16-ct"
 

@@ -19,7 +19,7 @@ class TestKaggleADKCompliance(unittest.TestCase):
         report = validate_adk_bundle(AGENT_ROOT)
         self.assertTrue(report["valid"], f"Validation errors: {report['errors']}")
         self.assertEqual(report["errors"], [])
-        self.assertEqual(report["config"]["name"], "gemma4-swe-agent")
+        self.assertEqual(report["config"]["name"], "gemma4_swe_agent")
         self.assertEqual(report["config"]["version"], "0.1.0")
         self.assertEqual(report["config"]["model"], REQUIRED_MODEL)
 
