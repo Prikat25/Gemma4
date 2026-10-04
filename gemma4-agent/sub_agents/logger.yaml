@@ -1,0 +1,13 @@
+name: logger
+description: "Maintains deterministic structured LoggerState JSON without prose invention"
+model: "gemma-4-31b-it-qat-w4a16-ct"
+instruction: ! include prompts/logging.md
+
+tools:
+  - read_file
+  - search_similar_code
+  - get_code_neighbors  
+  - get_code_subgraph
+  - get_status
+
+generate_content_config: !include ../configs/experiment.yaml

@@ -19,8 +19,17 @@ tools:
   - search_similar_code
   - get_code_subgraph
   - agent_tool:
-      config_path: sub_agents/repository_researcher.yaml
+      config_path: sub_agents/researcher.yaml
       skip_summarization: True
+
+sub_agents:
+  - sub_agents/researcher.yaml
+  - sub_agents/logger.yaml
+  - sub_agents/planner.yaml
+  - sub_agents/coder.yaml
+  - sub_agents/validator.yaml
+  - sub_agents/failure_analyzer.yaml
+
 
 skills:
   - skills/swe-reasoning
@@ -30,4 +39,4 @@ skills:
 
 include_contents: "default"
 
-adapter: null
+adapter: main_lora

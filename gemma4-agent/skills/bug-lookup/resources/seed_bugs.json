@@ -1,0 +1,51 @@
+[
+    {
+        "bug_id": "BUG-001",
+        "issue_pattern": "Users are charged the full amount even when a valid discount coupon is supplied.",
+        "repository_pattern": "checkout -> calculate_price -> calculate_subtotal -> apply_discount -> process_payment",
+        "symptoms": [
+            "discount not subtracted from subtotal",
+            "coupon validated but final price equals full subtotal",
+            "Expected: 100, Received: 120"
+        ],
+        "relevant_functions": [
+            "calculate_price",
+            "apply_discount",
+            "checkout"
+        ],
+        "fix_pattern": "Capture the numeric discount returned by apply_discount(subtotal, coupon) and return max(0.0, subtotal - discount) in calculate_price.",
+        "patch": "--- a/pricing.py\n+++ b/pricing.py\n@@ -21,3 +21,3 @@\n     if coupon:\n-        apply_discount(subtotal, coupon)\n-    return subtotal\n+        discount = apply_discount(subtotal, coupon)\n+        return max(0.0, round(subtotal - discount, 2))\n+    return subtotal",
+        "outcome": "passed"
+    },
+    {
+        "bug_id": "BUG-002",
+        "issue_pattern": "Pagination skips the last item on boundary pages when page_size divides total_items.",
+        "repository_pattern": "list_items -> paginate_query -> slice_results",
+        "symptoms": [
+            "off-by-one slice end index",
+            "missing final element in page slice"
+        ],
+        "relevant_functions": [
+            "paginate_query",
+            "slice_results"
+        ],
+        "fix_pattern": "Use start + page_size instead of start + page_size - 1 in Python list slice upper bound.",
+        "patch": "--- a/pagination.py\n+++ b/pagination.py\n@@ -12,1 +12,1 @@\n-    return items[start : start + page_size - 1]\n+    return items[start : start + page_size]",
+        "outcome": "passed"
+    },
+    {
+        "bug_id": "BUG-003",
+        "issue_pattern": "Cart items from previous customer session leak into subsequent orders when items argument is omitted.",
+        "repository_pattern": "create_cart -> add_item -> checkout",
+        "symptoms": [
+            "mutable default argument list shared across calls",
+            "state pollution between requests"
+        ],
+        "relevant_functions": [
+            "create_cart"
+        ],
+        "fix_pattern": "Replace mutable default `items=[]` with `items=None` and initialize `items = [] if items is None else list(items)`.",
+        "patch": "--- a/cart.py\n+++ b/cart.py\n@@ -4,2 +4,3 @@\n-def create_cart(items=[]):\n+def create_cart(items=None):\n+    items = [] if items is None else list(items)",
+        "outcome": "passed"
+    }
+]

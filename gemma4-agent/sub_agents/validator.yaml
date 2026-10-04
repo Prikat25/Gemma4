@@ -1,0 +1,15 @@
+name: validator
+description: "Executes targeted tests first"
+model: "gemma-4-31b-it-qat-w4a16-ct"
+
+tools:
+  - read_file
+  - search_similar_code
+  - get_code_neighbors  
+  - get_code_subgraph
+  - get_status
+
+skills:
+  - skills/testing
+
+generate_content_config: !include ../configs/experiment.yaml
