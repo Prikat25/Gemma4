@@ -1,12 +1,11 @@
 name: validator
-description: "Executes targeted tests first"
+description: "Executes targeted tests for the modified files to verify resolution without running full-repo test suites."
 model: "gemma-4-31b-it-qat-w4a16-ct"
+instruction: !include ../prompts/validator.md
 
 tools:
+  - run_command
   - read_file
-  - search_similar_code
-  - get_code_neighbors  
-  - get_code_subgraph
   - get_status
 
 skills:

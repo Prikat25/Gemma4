@@ -1,19 +1,17 @@
 name: researcher
-description: "Read-only sub-agent specializing in repository graph exploration, semantic code search and symbol graphs to locate root causes"
+description: "Read-only sub-agent that localizes defect files and symbols via code graph and semantic search, matching against bug-lookup patterns."
 model: "gemma-4-31b-it-qat-w4a16-ct"
 instruction: !include ../prompts/researcher.md
 
 tools:
   - read_file
   - search_similar_code
-  - get_code_neighbors  
+  - get_code_neighbors
   - get_code_subgraph
+  - get_status
 
 skills:
   - skills/repository-navigation
-  - skills/flow-analysis
-  - skills/function-summary
   - skills/bug-lookup
-  - skills/testing
 
 generate_content_config: !include ../configs/experiment.yaml

@@ -20,22 +20,21 @@ tools:
   - get_code_subgraph
   - agent_tool:
       config_path: sub_agents/researcher.yaml
-      skip_summarization: True
+      skip_summarization: true
 
 sub_agents:
   - config_path: sub_agents/researcher.yaml
-  - config_path: sub_agents/logger.yaml
   - config_path: sub_agents/planner.yaml
   - config_path: sub_agents/coder.yaml
   - config_path: sub_agents/validator.yaml
-  - config_path: sub_agents/failure_analyzer.yaml
-
 
 skills:
   - skills/swe-reasoning
   - skills/repository-navigation
   - skills/testing
-  - skills/bug-patterns  
+  - skills/bug-patterns
+  - skills/bug-lookup
+  - skills/coding
 
 include_contents: "default"
 

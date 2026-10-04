@@ -1,16 +1,17 @@
 name: coder
-description: "Generates minimal unified diff patch from PlanArtifact and localized files"
+description: "Applies surgical search-and-replace edits to implementation files using edit_file based on the approved PlanArtifact."
 model: "gemma-4-31b-it-qat-w4a16-ct"
 instruction: !include ../prompts/coder.md
 
 tools:
   - read_file
-  - search_similar_code
-  - get_code_neighbors  
-  - get_code_subgraph
+  - edit_file
+  - write_file
+  - run_command
   - get_status
 
 skills:
   - skills/coding
+  - skills/swe-reasoning
 
 generate_content_config: !include ../configs/experiment.yaml

@@ -107,49 +107,72 @@ def validate_adk_bundle(bundle_dir: Path) -> Dict[str, Any]:
     # 3. Instruction file existence
     instruction = cfg.get("instruction")
     if instruction:
+        if isinstance(instruction, str) and instruction.startswith("!include "):
+            instruction = instruction.split("!include ", 1)[1].strip()
         inst_path = bundle_dir / instruction
         if not inst_path.exists() and not (AGENT_ROOT / instruction).exists():
             errors.append(f"Instruction file '{instruction}' not found")
 
-    # 4. Official tools validation
+    # 4. Official tools validation (tools and agent_tool)
     tools = cfg.get("tools", [])
     if isinstance(tools, list):
         for t in tools:
-            if t not in OFFICIAL_HARNESS_TOOLS:
-                errors.append(f"Tool '{t}' is not an official Kaggle competition harness tool")
+            if isinstance(t, str):
+                if t.startswith("agent_tool"):
+                    continue
+                if t not in OFFICIAL_HARNESS_TOOLS:
+                    errors.append(f"Tool '{t}' is not an official Kaggle competition harness tool")
+            elif isinstance(t, dict):
+                if "agent_tool" not in t:
+                    errors.append(f"Tool dictionary '{t}' must declare 'agent_tool'")
 
     # 5. Skills verification
     skills = cfg.get("skills", [])
     if isinstance(skills, list):
         for sk in skills:
-            sk_dir = bundle_dir / "skills" / sk
-            if not sk_dir.exists():
-                sk_dir = AGENT_ROOT / "skills" / sk
-            if not sk_dir.exists():
+            clean_sk = sk.replace("skills/", "")
+            candidates = [clean_sk, clean_sk.replace("_", "-"), clean_sk.replace("-", "_")]
+            sk_dir = None
+            for cand in candidates:
+                for base in [bundle_dir / "skills", AGENT_ROOT / "skills", bundle_dir, AGENT_ROOT]:
+                    cand_path = base / cand
+                    if cand_path.exists() and cand_path.is_dir():
+                        sk_dir = cand_path
+                        break
+                if sk_dir:
+                    break
+
+            if not sk_dir:
                 errors.append(f"Skill directory not found for declared skill '{sk}'")
             else:
                 skill_md = sk_dir / "SKILL.md"
                 if not skill_md.exists():
+                    skill_md = sk_dir / "SKILL.MD"
+                if not skill_md.exists():
                     errors.append(f"Missing SKILL.md in skill '{sk}'")
-                elif "name:" not in skill_md.read_text(encoding="utf-8"):
+                elif "name:" not in skill_md.read_text(encoding="utf-8").lower():
                     warnings.append(f"SKILL.md in '{sk}' missing YAML frontmatter 'name:'")
 
-    # 6. Subagent (agent_tools) verification
-    agent_tools = cfg.get("agent_tools", [])
-    if isinstance(agent_tools, list):
-        for at in agent_tools:
-            sa_dir = bundle_dir / "sub_agents"
-            if not sa_dir.exists():
-                sa_dir = AGENT_ROOT / "sub_agents"
-            if not sa_dir.exists():
-                warnings.append("Declared agent_tools but sub_agents directory not found")
+    # 6. Subagent (agent_tools / sub_agents) verification
+    sub_agents = cfg.get("sub_agents", [])
+    if isinstance(sub_agents, list):
+        for sa in sub_agents:
+            if isinstance(sa, str) and "config_path:" in sa:
+                path = sa.split("config_path:", 1)[1].strip()
+                if not (bundle_dir / path).exists() and not (AGENT_ROOT / path).exists():
+                    errors.append(f"Sub-agent config '{path}' not found")
 
     # 7. LoRA adapter verification
     adapter = cfg.get("adapter")
     if adapter:
         adapter_path = bundle_dir / adapter
         if not adapter_path.exists():
+            adapter_path = bundle_dir / "adapters" / adapter
+        if not adapter_path.exists():
+            adapter_path = AGENT_ROOT / "adapters" / adapter
+        if not adapter_path.exists():
             adapter_path = AGENT_ROOT / adapter
+
         if not adapter_path.exists():
             errors.append(f"LoRA adapter '{adapter}' declared but directory not found. Fake verification prohibited.")
         else:

@@ -1,19 +1,17 @@
 name: planner
-description: "Produces structured PlanArtifact from flow divergence & evidence. Strictly forbidden from editing files"
+description: "Produces minimal PlanArtifact by mapping identified task category and root cause to a surgical fix strategy. Does not edit files."
 model: "gemma-4-31b-it-qat-w4a16-ct"
 instruction: !include ../prompts/planner.md
 
 tools:
   - read_file
   - search_similar_code
-  - get_code_neighbors  
+  - get_code_neighbors
   - get_code_subgraph
   - get_status
 
 skills:
-  - skills/function_summary
-  - skills/flow-analysis
-  - skills/bug_lookup
-  - skills/testing
+  - skills/swe-reasoning
+  - skills/bug-lookup
 
 generate_content_config: !include ../configs/experiment.yaml
