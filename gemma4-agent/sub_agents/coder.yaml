@@ -1,7 +1,7 @@
 name: coder
 description: "Generates minimal unified diff patch from PlanArtifact and localized files"
 model: "gemma-4-31b-it-qat-w4a16-ct"
-instruction: ! include prompts/coder.md
+instruction: !include ../prompts/coder.md
 
 tools:
   - read_file

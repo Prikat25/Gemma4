@@ -23,12 +23,12 @@ tools:
       skip_summarization: True
 
 sub_agents:
-  - sub_agents/researcher.yaml
-  - sub_agents/logger.yaml
-  - sub_agents/planner.yaml
-  - sub_agents/coder.yaml
-  - sub_agents/validator.yaml
-  - sub_agents/failure_analyzer.yaml
+  - config_path: sub_agents/researcher.yaml
+  - config_path: sub_agents/logger.yaml
+  - config_path: sub_agents/planner.yaml
+  - config_path: sub_agents/coder.yaml
+  - config_path: sub_agents/validator.yaml
+  - config_path: sub_agents/failure_analyzer.yaml
 
 
 skills:

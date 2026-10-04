@@ -1,7 +1,7 @@
 name: planner
 description: "Produces structured PlanArtifact from flow divergence & evidence. Strictly forbidden from editing files"
 model: "gemma-4-31b-it-qat-w4a16-ct"
-instruction: ! include prompts/planner.md
+instruction: !include ../prompts/planner.md
 
 tools:
   - read_file

@@ -1,7 +1,7 @@
 name: researcher
 description: "Read-only sub-agent specializing in repository graph exploration, semantic code search and symbol graphs to locate root causes"
 model: "gemma-4-31b-it-qat-w4a16-ct"
-instruction: !include prompts/researcher.md
+instruction: !include ../prompts/researcher.md
 
 tools:
   - read_file

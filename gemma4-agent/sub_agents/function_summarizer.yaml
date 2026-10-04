@@ -1,7 +1,7 @@
 name: function_summarizer
 description: "Extracts AST functions/classes/tests and generates persistent repository_knowledge cache"
 model: "gemma-4-31b-it-qat-w4a16-ct"
-instruction: ! include prompts/function_summarizer.md
+instruction: !include ../prompts/function_summarizer.md
 
 tools:
   - read_file

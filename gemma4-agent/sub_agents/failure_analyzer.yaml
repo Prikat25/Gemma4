@@ -1,7 +1,7 @@
 name: failure_analyzer
 description: "Translates test failures into structured FailureAnalysisArtifact for iterative repair"
 model: "gemma-4-31b-it-qat-w4a16-ct"
-instruction: ! include prompts/failure_analyzer.md
+instruction: !include ../prompts/failure_analyzer.md
 
 tools:
   - read_file

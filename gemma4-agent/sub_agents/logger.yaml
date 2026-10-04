@@ -1,7 +1,7 @@
 name: logger
 description: "Maintains deterministic structured LoggerState JSON without prose invention"
 model: "gemma-4-31b-it-qat-w4a16-ct"
-instruction: ! include prompts/logging.md
+instruction: !include ../prompts/logging.md
 
 tools:
   - read_file
